@@ -11,6 +11,9 @@ jobs:
   sonarqube:
     name: Build and Analyze
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: expedienteService
 
     steps:
       - uses: actions/checkout@v4
