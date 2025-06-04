@@ -11,8 +11,7 @@ jobs:
   sonarqube:
     name: Build and Analyze
     runs-on: ubuntu-latest
-    # Este 'defaults' debería hacer que todos los comandos 'run' se ejecuten desde 'expedienteService/'
-    # Pero hemos añadido un 'cd' explícito en el paso 'Build and analyze with SonarQube' por seguridad.
+    # ESTO YA ESTÁ FUNCIONANDO CORRECTAMENTE
     defaults:
       run:
         working-directory: expedienteService 
@@ -22,22 +21,21 @@ jobs:
         with:
           fetch-depth: 0
 
-      # Pasos de depuración: imprimen el directorio actual y su contenido. Útiles para verificar.
+      # Pasos de depuración: MUY IMPORTANTES para confirmar el directorio actual
+      # Aquí, 'pwd' debería imprimir '/home/runner/work/expediente/expediente/expedienteService'
       - name: Debug - Print Current Directory (after checkout)
         run: pwd 
 
       - name: Debug - List Directory Contents (after checkout)
         run: ls -la
 
-      # Configura el JDK 17 necesario para tu proyecto Maven
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           java-version: 17
           distribution: 'zulu'
 
-      # Paso para instalar la librería 'SgData_SgLib_WSEthCipher' en el repositorio Maven local del runner.
-      # Asegúrate de que el JAR esté en 'expedienteService/lib/' en tu repositorio.
+      # Este paso instala el JAR. Sigue siendo necesario.
       - name: Install local SgData_SgLib_WSEthCipher JAR
         run: |
           mvn install:install-file \
@@ -47,9 +45,7 @@ jobs:
           -Dversion=1.0-1 \
           -Dpackaging=jar \
           -DgeneratePom=true
-        # Nota: El path 'lib/SgData_SgLib_WSEthCipher-1.0-1.jar' es relativo al 'working-directory' configurado arriba.
 
-      # Caché de paquetes de SonarQube para acelerar builds futuros
       - name: Cache SonarQube packages
         uses: actions/cache@v4
         with:
@@ -57,9 +53,8 @@ jobs:
           key: ${{ runner.os }}-sonar
           restore-keys: ${{ runner.os }}-sonar
 
-      # Caché de paquetes de Maven para acelerar builds futuros
       - name: Cache Maven packages
-        uses: actions/cache@v4 # Corregido de 'actions:cache@v4' a 'actions/cache@v4'
+        uses: actions/cache@v4
         with:
           path: ~/.m2
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
@@ -70,6 +65,6 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
-          # Nos aseguramos de estar en el directorio correcto antes de ejecutar Maven
-          cd expedienteService 
+          # ¡ELIMINA LA SIGUIENTE LÍNEA!
+          # cd expedienteService 
           mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=Roaau_expediente
