@@ -20,10 +20,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      # --- ¡ESTE ES EL PASO CLAVE PARA EL ORDEN Y LA UBICACIÓN! ---
-      - name: Change to Maven Project Directory
-        run: cd expedienteService # Esto moverá el directorio de trabajo del runner
-
       # --- PASOS DE DEPURACIÓN AÑADIDOS ---
       - name: Debug - Print Current Directory
         run: pwd
