@@ -11,7 +11,6 @@ jobs:
   sonarqube:
     name: Build and Analyze
     runs-on: ubuntu-latest
-    # ESTO YA ESTÁ FUNCIONANDO CORRECTAMENTE
     defaults:
       run:
         working-directory: expedienteService 
@@ -21,8 +20,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      # Pasos de depuración: MUY IMPORTANTES para confirmar el directorio actual
-      # Aquí, 'pwd' debería imprimir '/home/runner/work/expediente/expediente/expedienteService'
       - name: Debug - Print Current Directory (after checkout)
         run: pwd 
 
@@ -35,7 +32,6 @@ jobs:
           java-version: 17
           distribution: 'zulu'
 
-      # Este paso instala el JAR. Sigue siendo necesario.
       - name: Install local SgData_SgLib_WSEthCipher JAR
         run: |
           mvn install:install-file \
@@ -60,11 +56,11 @@ jobs:
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
 
-      # Construye y analiza el proyecto con SonarQube
       - name: Build and analyze with SonarQube
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
-          # ¡ELIMINA LA SIGUIENTE LÍNEA!
-          # cd expedienteService 
-          mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=Roaau_expediente
+          # Ahora SonarQube también requiere la propiedad sonar.organization
+          mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
+          -Dsonar.projectKey=Roaau_expediente \
+          -Dsonar.organization=YOUR_ORGANIZATION_ID # <-- ¡AÑADE ESTA LÍNEA Y REEMPLAZA CON TU ID REAL!
