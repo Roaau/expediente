@@ -11,9 +11,9 @@ jobs:
   sonarqube:
     name: Build and Analyze
     runs-on: ubuntu-latest
+    # Mantenemos esto por si acaso, aunque parece que no funciona como esperamos para el mvn
     defaults:
       run:
-        # Esto asegura que todos los comandos 'run' se ejecuten desde expedienteService/
         working-directory: expedienteService 
 
     steps:
@@ -21,13 +21,12 @@ jobs:
         with:
           fetch-depth: 0
 
-      # --- MANTÉN TUS PASOS DE DEPURACIÓN para verificar la ruta ---
-      - name: Debug - Print Current Directory
+      # Mantén estos pasos de depuración, nos dirán dónde estamos realmente
+      - name: Debug - Print Current Directory (after checkout)
         run: pwd 
 
-      - name: Debug - List Directory Contents
+      - name: Debug - List Directory Contents (after checkout)
         run: ls -la
-      # --- FIN DE PASOS DE DEPURACIÓN ---
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
@@ -35,7 +34,7 @@ jobs:
           java-version: 17
           distribution: 'zulu'
 
-      # --- ¡NUEVO PASO CRÍTICO: Instalar la librería local! ---
+      # Asegúrate de que este paso esté correcto y el JAR en la ruta especificada
       - name: Install local SgData_SgLib_WSEthCipher JAR
         run: |
           mvn install:install-file \
@@ -45,8 +44,7 @@ jobs:
           -Dversion=1.0-1 \
           -Dpackaging=jar \
           -DgeneratePom=true
-        # Nota: El path 'lib/SgData_SgLib_WSEthCipher-1.0-1.jar' es relativo a working-directory: expedienteService
-      # --------------------------------------------------------
+        # Asegúrate de que el JAR esté en expedienteService/lib/ en tu repositorio
 
       - name: Cache SonarQube packages
         uses: actions/cache@v4
@@ -56,7 +54,7 @@ jobs:
           restore-keys: ${{ runner.os }}-sonar
 
       - name: Cache Maven packages
-        uses: actions/cache@v4
+        uses: actions:cache@v4
         with:
           path: ~/.m2
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
@@ -65,4 +63,8 @@ jobs:
       - name: Build and analyze with SonarQube
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=Roaau_expediente
+        # --- ¡CAMBIO AQUÍ! Forzamos el cambio de directorio para este comando específico ---
+        run: |
+          cd expedienteService # NOS ASEGURAMOS DE ESTAR EN EL DIRECTORIO CORRECTO
+          mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=Roaau_expediente
+        # -----------------------------------------------------------------------------------
