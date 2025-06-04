@@ -63,4 +63,4 @@ jobs:
           # Ahora SonarQube también requiere la propiedad sonar.organization
           mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
           -Dsonar.projectKey=Roaau_expediente \
-          -Dsonar.organization=YOUR_ORGANIZATION_ID # <-- ¡AÑADE ESTA LÍNEA Y REEMPLAZA CON TU ID REAL!
+          -Dsonar.organization=roaau # <-- ¡AÑADE ESTA LÍNEA Y REEMPLAZA CON TU ID REAL!
