@@ -1,36 +1,49 @@
-name: SonarQube
+name: SonarQube Scan
+
 on:
   push:
     branches:
-      - main
+      - main # O el nombre de tu rama principal
   pull_request:
     types: [opened, synchronize, reopened]
+
 jobs:
-  build:
-    name: Build and analyze
+  sonarqube: # Nombre del job, lo cambié para ser más claro
+    name: Build and Analyze
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
-      - name: Set up JDK 17
+          fetch-depth: 0 # Es importante para un análisis completo de SonarQube
+
+      # --- ¡ESTE ES EL PASO CRUCIAL QUE FALTABA! ---
+      # Cambia el directorio de trabajo a donde está tu pom.xml real
+      - name: Change to Maven Project Directory
+        run: cd expedienteService # Esto moverá el directorio de trabajo del runner
+
+      - name: Set up JDK 17 # Tu proyecto está configurado para Java 17 aquí
         uses: actions/setup-java@v4
         with:
           java-version: 17
-          distribution: 'zulu' # Alternative distribution options are available.
+          distribution: 'zulu'
+
       - name: Cache SonarQube packages
         uses: actions/cache@v4
         with:
           path: ~/.sonar/cache
           key: ${{ runner.os }}-sonar
           restore-keys: ${{ runner.os }}-sonar
+
       - name: Cache Maven packages
         uses: actions/cache@v4
         with:
           path: ~/.m2
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
-      - name: Build and analyze
+
+      - name: Build and analyze with SonarQube # Paso de compilación y análisis
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        # Ahora, 'mvn' se ejecutará DENTRO de expedienteService/
         run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=Roaau_expediente
