@@ -13,16 +13,17 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: expedienteService
+        # Esto asegura que todos los comandos 'run' se ejecuten desde expedienteService/
+        working-directory: expedienteService 
 
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      # --- PASOS DE DEPURACIÓN AÑADIDOS ---
+      # --- MANTÉN TUS PASOS DE DEPURACIÓN para verificar la ruta ---
       - name: Debug - Print Current Directory
-        run: pwd
+        run: pwd 
 
       - name: Debug - List Directory Contents
         run: ls -la
@@ -33,6 +34,19 @@ jobs:
         with:
           java-version: 17
           distribution: 'zulu'
+
+      # --- ¡NUEVO PASO CRÍTICO: Instalar la librería local! ---
+      - name: Install local SgData_SgLib_WSEthCipher JAR
+        run: |
+          mvn install:install-file \
+          -Dfile=lib/SgData_SgLib_WSEthCipher-1.0-1.jar \
+          -DgroupId=com.seguridata.wseth \
+          -DartifactId=SgData_SgLib_WSEthCipher \
+          -Dversion=1.0-1 \
+          -Dpackaging=jar \
+          -DgeneratePom=true
+        # Nota: El path 'lib/SgData_SgLib_WSEthCipher-1.0-1.jar' es relativo a working-directory: expedienteService
+      # --------------------------------------------------------
 
       - name: Cache SonarQube packages
         uses: actions/cache@v4
